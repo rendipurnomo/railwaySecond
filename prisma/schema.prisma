@@ -1,0 +1,114 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id          String @id @default(cuid())
+  fullName    String @map("full_name")
+  username    String @unique
+  address     String @db.VarChar(255)
+  profilePic  String @map("profile_pic")
+  picUrl      String @map("picture_url")
+  email       String @unique
+  password    String
+  phone       String @db.VarChar(20)
+  roles       String @default("member")
+  event       Boolean @default(false)
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @map("updated_at")
+
+  @@map("user")
+}
+
+enum Categories {
+  Food
+  Fashion
+  Accesories
+  Craft
+  Electronic
+  Otomotif
+  Furniture
+  Health
+  Herbal
+  Digital
+}
+
+enum Positions {
+  EVENT 
+  REKOMENDASI
+  TERBARU
+  TERLARIS
+  PROMO
+}
+
+
+model Products {
+  id          String @id @default(cuid())
+  name        String @db.VarChar(100)
+  brand       String  @db.VarChar(100)
+  description String @db.LongText
+  price       String
+  stock       Int @default(0) @db.UnsignedInt()
+  category    Categories
+  image       String
+  imageUrl    String @map("image_url")
+  position    Positions
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @map("updated_at")
+
+  @@map("product")
+}
+
+model Orders {
+  id          String  @id @default(cuid())
+  username    String
+  pengiriman  String
+  quantity    Int @default(0) @db.UnsignedInt
+  totalPrice  String
+  delivery    Boolean @default(false)
+  paid        Boolean @default(false)
+  memo        String @default("")
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @map("updated_at")
+
+  @@map("order")
+}
+
+model Banners {
+  id          String @id @default(cuid())
+  name        String
+  image       String
+  ImageUrl    String
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @map("updated_at")
+
+  @@map("banner")
+}
+
+model Blogs {
+  id          String @id @default(cuid())
+  title       String @db.VarChar(255)
+  description String @db.LongText
+  image       String
+  imageUrl    String
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @map("updated_at")
+
+  @@map("blog")
+}
