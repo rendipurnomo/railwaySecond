@@ -30,7 +30,7 @@ CREATE TABLE `product` (
     `category` ENUM('Food', 'Fashion', 'Accesories', 'Craft', 'Electronic', 'Otomotif', 'Furniture', 'Health', 'Herbal', 'Digital') NOT NULL,
     `image` VARCHAR(191) NOT NULL,
     `image_url` VARCHAR(191) NOT NULL,
-    `position` ENUM('EVENT', 'REKOMENDASI', 'TERBARU', 'TERLARIS') NOT NULL,
+    `position` ENUM('EVENT', 'REKOMENDASI', 'TERBARU', 'TERLARIS', 'PROMO') NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
@@ -38,19 +38,18 @@ CREATE TABLE `product` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `order` (
+CREATE TABLE `orders` (
     `id` VARCHAR(191) NOT NULL,
     `username` VARCHAR(191) NOT NULL,
     `pengiriman` VARCHAR(191) NOT NULL,
     `quantity` INTEGER UNSIGNED NOT NULL DEFAULT 0,
-    `totalPrice` VARCHAR(191) NOT NULL,
+    `total_price` VARCHAR(191) NOT NULL,
     `delivery` BOOLEAN NOT NULL DEFAULT false,
     `paid` BOOLEAN NOT NULL DEFAULT false,
-    `memo` VARCHAR(191) NOT NULL DEFAULT '',
+    `memo` VARCHAR(191) NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
-    UNIQUE INDEX `order_username_key`(`username`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

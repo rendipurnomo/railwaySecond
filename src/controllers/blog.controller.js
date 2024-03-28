@@ -5,10 +5,11 @@ const prisma = new PrismaClient()
 
 exports.getBlogs = async (req, res) => {
   try {
-    const blogs = await prisma.blogs.findMany();
-    if (blogs.length === 0 || !blogs) {
-      return res.status(404).json({ message: 'Blog not found' });
-    }
+    const blogs = await prisma.blogs.findMany({
+      orderBy: {
+        createdAt: 'asc'
+      }
+    });
     res.status(200).json(blogs);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -40,8 +41,8 @@ exports.createBlog = async (req, res) => {
   const fileSize = file.data.length;
   const ext = path.extname(file.name);
   const fileName = file.md5 + '_' + Date.now() + ext;
-  const url = `${req.protocol}://${req.get('host')}/blogs/${fileName}`;
-  const allowedType = ['.png', '.jpg', '.jpeg'];
+  const url = `${req.protocol}://localhost:5000/blogs/${fileName}`;
+  const allowedType = ['.png', '.jpg', '.jpeg', '.webp'];
 
   if (!allowedType.includes(ext.toLowerCase())) {
     res.status(422).json({ msg: 'Invalid Images' });
@@ -97,7 +98,7 @@ exports.updateBlog = async (req, res) => {
     const fileSize = file.data.length;
     const ext = path.extname(file.name);
     fileName = file.md5 + '_' + Date.now() + ext;
-    const allowedType = ['.png', '.jpg', '.jpeg'];
+    const allowedType = ['.png', '.jpg', '.jpeg', '.webp'];
 
     if (!allowedType.includes(ext.toLowerCase())) {
       res.status(422).json({ msg: 'Invalid Images' });
@@ -109,31 +110,31 @@ exports.updateBlog = async (req, res) => {
 
     const filePath = `src/public/blogs/${blog.image}`;
     fs.unlinkSync(filePath);
-    const { title, description } =
-      req.body;
-    const url = `${req.protocol}://${req.get('host')}/blogs/${fileName}`;
-
+    
     file.mv(`src/public/blogs/${fileName}`, async (err) => {
       if (err) {
         console.error(err);
         return res.status(500).json({ msg: err.message });
       }
-      try {
-        const blog = await prisma.blogs.update({
-          where: { id: id },
-          data: {
-            title,
-            description,
-            image: fileName,
-            imageUrl: url,
-          },
-        });
-        res.status(200).json({ message: 'Blog updated', blog });
-      } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
-      }
     });
+  }
+  const { title, description } =
+    req.body;
+  const url = `${req.protocol}://localhost:5000/blogs/${fileName}`;
+  try {
+    const blog = await prisma.blogs.update({
+      where: { id: id },
+      data: {
+        title,
+        description,
+        image: fileName,
+        imageUrl: url,
+      },
+    });
+    res.status(200).json({ message: 'Blog updated', blog });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 }
 

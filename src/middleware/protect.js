@@ -4,34 +4,24 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 exports.protect = async (req, res, next) => {
-  try {
-    const token = req.cookies.token;
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(" ")[1];
     if (!token) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (!decoded) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-    const user = await prisma.users.findUnique({
-      where: {
-        id: decoded.userId,
-      },
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      req.email = decoded.email;
+      next();
     });
-    if (!user) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-    req.user = user;
-    next();
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
 };
 
 exports.protectRoles = async (req, res, next) => {
   try {
-    const token = req.cookies.token;
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(" ")[1];
     if (!token) {
       return res.status(401).json({ message: "Unauthorized" });
     }
@@ -62,7 +52,8 @@ exports.protectRoles = async (req, res, next) => {
 
 exports.protectAdmin = async (req, res, next) => {
   try {
-    const token = req.cookies.token;
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(" ")[1];
     if (!token) {
       return res.status(401).json({ message: "Unauthorized" });
     }
@@ -91,7 +82,8 @@ exports.protectAdmin = async (req, res, next) => {
 
 exports.protectEvent = async (req, res, next) => {
   try {
-    const token = req.cookies.token;
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(" ")[1];
     if (!token) {
       return res.status(401).json({ message: "Unauthorized" });
     }
@@ -115,6 +107,7 @@ exports.protectEvent = async (req, res, next) => {
             "Item Ini Hanya Bisa Di akses oleh Member yang mengikuti event",
         });
     }
+    res.json(user)
     req.user = user;
     next();
   } catch (error) {

@@ -8,7 +8,7 @@ exports.getProducts = async (req, res) => {
   try {
     const response = await prisma.products.findMany({
       orderBy: {
-        createdAt: "desc",
+        createdAt: "asc",
       },
     });
     res.status(200).json(response);

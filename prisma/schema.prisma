@@ -72,20 +72,20 @@ model Products {
   @@map("product")
 }
 
-model Orders {
+model Order {
   id          String  @id @default(cuid())
   username    String
   pengiriman  String
   quantity    Int @default(0) @db.UnsignedInt
-  totalPrice  String
+  totalPrice  String @map("total_price")
   delivery    Boolean @default(false)
   paid        Boolean @default(false)
-  memo        String @default("")
+  memo        String
 
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @default(now()) @map("updated_at")
 
-  @@map("order")
+  @@map("orders")
 }
 
 model Banners {

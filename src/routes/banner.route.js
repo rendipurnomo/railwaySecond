@@ -4,8 +4,9 @@ const bannerController = require("../controllers/banner.controller.js");
 const { protect, protectAdmin } = require("../middleware/protect.js");
 
 router.get("/", bannerController.getBanners);
-router.post("/", protect, protectAdmin, bannerController.createBanner);
-router.patch("/:id", protect, protectAdmin, bannerController.updateBanner);
-router.delete("/:id", protect, protectAdmin, bannerController.deleteBanner);
+router.get("/:id", bannerController.getBannerById);
+router.post("/",bannerController.createBanner);
+router.patch("/:id",bannerController.updateBanner);
+router.delete("/:id",bannerController.deleteBanner);
 
 module.exports = router

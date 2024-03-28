@@ -1,6 +1,5 @@
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
-const { generateTokenAndSetCookie } = require('../utils/generateToken.js');
 const path = require('path');
 const fs = require('fs');
 const jwt = require("jsonwebtoken");
@@ -24,10 +23,10 @@ exports.signUpUser = async (req, res) => {
   const ext = path.extname(file.name);
   const fileName = file.md5 + '_' + Date.now() + ext;
   const url = `${req.protocol}://localhost:5000/images/${fileName}`;
-  const allowedType = ['.png', '.jpg', '.jpeg'];
+  const allowedType = ['.png', '.jpg', '.jpeg', '.webp'];
 
   if (!fullName || !username || !password || !confirmPassword || !email || !address || !phone) {
-    return res.status(400).json({ message: 'Please fill in all fields' });
+    return res.status(400).json({ message: 'Semua data harus diisi' });
   }
 
   if (password !== confirmPassword) {
@@ -35,15 +34,15 @@ exports.signUpUser = async (req, res) => {
   }
 
   if(password.length < 6) {
-    return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    return res.status(400).json({ message: 'Password Minimal 6 characters' });
   }
 
   if (!allowedType.includes(ext.toLowerCase())) {
-    res.status(422).json({ msg: 'Invalid Images' });
+    return res.status(422).json({ message: 'Format gambar tidak didukung' });
   }
 
   if (fileSize > 2000000) {
-    res.status(422).json({ msg: 'Image must be less than 2mb' });
+    return res.status(422).json({ message: 'Ukuran gambar tidak boleh lebih dari 2Mb' });
   }
 
   const user = await prisma.users.findUnique({
@@ -71,43 +70,33 @@ exports.signUpUser = async (req, res) => {
     if (err) {
       return res.status(500).json({ message: err.message });
     }
-    try {
-      const newUser = await prisma.users.create({
-        data: {
-          fullName,
-          username,
-          password: hashedPassword,
-          email,
-          address,
-          phone,
-          profilePic: fileName,
-          picUrl: url,
-        },
-      });
-
-      if (newUser) {
-        //generate jwt token
-        generateTokenAndSetCookie(newUser.id, res);
-
-        res.status(201).json({
-          id: newUser.id,
-          fullName: newUser.fullName,
-          username: newUser.username,
-          email: newUser.email,
-          address: newUser.address,
-          phone: newUser.phone,
-          roles: newUser.roles,
-          event: newUser.event,
-          profilePic: newUser.profilePic,
-        });
-      } else {
-        res.status(500).json({ message: 'Invalid user data' });
-      }
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ message: error.message });
-    }
   });
+  try {
+    const refresh_token = jwt.sign({ username }, process.env.JWT_SECRET, {
+      expiresIn: '15d',
+    });
+    const newUser = await prisma.users.create({
+      data: {
+        fullName,
+        username,
+        password: hashedPassword,
+        email,
+        address,
+        phone,
+        profilePic: fileName,
+        picUrl: url,
+        refreshToken: refresh_token
+      },
+    });
+    if (newUser) {
+      return res.status(201).json(newUser);
+    } else {
+      return res.status(500).json({ message: 'Invalid user data' });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
 };
 
 exports.loginUser = async (req, res) => {
@@ -128,55 +117,32 @@ exports.loginUser = async (req, res) => {
         .json({ message: 'Username or Password incorrect' });
     }
 
-    generateTokenAndSetCookie(user.id, res);
-
-    res.status(200).json({
-      id: user.id,
-      fullName: user.fullName,
-      username: user.username,
-      email: user.email,
-      address: user.address,
-      phone: user.phone,
-      roles: user.roles,
-      event: user.event,
-      profilePic: user.profilePic,
-    });
+    res.status(200).json(user);
   } catch (error) {
-    console.log(error);
     res.status(500).json({ message: error.message });
   }
 };
 
-exports.getMe = async (req, res) => {
+exports.logoutUser = async(req, res) => {
   try {
-    const token = req.cookies.token;
-    if(!token) {
-      return res.json({ message: "Unauthorized" });
-    }
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if(!decoded) {
-      return res.json({ message: "Unauthorized" });
-    }
     const user = await prisma.users.findUnique({
       where: {
-        id: decoded.userId
+        username: req.user.username
       }
     })
     if(!user) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(403).json({ message: "User not found" });
     }
 
-    generateTokenAndSetCookie(user.id, res);
-    res.status(200).json(user)
-  }catch (error) {
-    res.status(500).json({message: 'Internal server error'})
-  }
-}
-
-exports.logoutUser = (req, res) => {
-  try {
-    res.clearCookie('token');
-    res.status(200).json({ message: 'Logged out successfully' });
+    await prisma.users.update({
+      where: {
+        id: user.id
+      },
+      data: {
+        refreshToken: null
+      }
+    })
+    return res.status(200).json({ message: 'Logged out successfully' });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });

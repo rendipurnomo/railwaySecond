@@ -7,6 +7,8 @@ const productRoute = require("./routes/product.route.js")
 const orderRoute = require("./routes/order.route.js")
 const bannerRoute = require("./routes/banner.route.js")
 const blogRoute = require("./routes/blog.route.js")
+const {PrismaClient} = require("@prisma/client")
+const prisma = new PrismaClient()
 const cors = require("cors")
 
 const dotenv = require("dotenv")
@@ -29,8 +31,20 @@ app.use("/api/orders", orderRoute)
 app.use("/api/banners", bannerRoute)
 app.use("/api/blogs", blogRoute)
 
-app.get("/", (req, res) => {
-  res.json({ message: "Server is up and running" })
+app.get("/search", async(req, res) => {
+  const { query } = req.query;
+  try {
+    const products = await prisma.products.findMany({
+      where: {
+        name: {
+          contains: query
+        }
+      }
+    });
+    res.status(200).json(products);
+  } catch (error) {
+    console.error(error);
+  }
 })
 
 app.listen(PORT, () => {

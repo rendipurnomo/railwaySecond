@@ -56,7 +56,7 @@ exports.updateUser = async (req, res) => {
     const fileSize = file.data.length;
     const ext = path.extname(file.name);
     fileName = file.md5 + '_' + Date.now() + ext;
-    const allowedType = ['.png', '.jpg', '.jpeg'];
+    const allowedType = ['.png', '.jpg', '.jpeg', '.webp'];
 
     if (!allowedType.includes(ext.toLowerCase())) {
       res.status(422).json({ msg: 'Invalid Images' });
@@ -91,7 +91,7 @@ exports.updateUser = async (req, res) => {
         picUrl: url,
       },
     });
-    res.status(200).json({ message: 'User updated', user });
+    res.status(200).json(user);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });

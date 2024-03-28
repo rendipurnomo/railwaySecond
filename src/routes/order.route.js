@@ -3,11 +3,11 @@ const router = express.Router();
 const orderController = require("../controllers/order.controller.js");
 const { protect, protectRoles, protectAdmin } = require("../middleware/protect.js");
 
-router.get("/", protect, orderController.getOrders);
-router.get("/:id", protect, orderController.getOrderByid);
-router.post("/", protect, protectRoles, orderController.createOrder);
-router.patch("/delivery/:id", protect, protectAdmin, orderController.updateDelivery);
-router.patch("/payment/:id", protect, orderController.updatePayment);
-router.delete("/:id", protect, protectAdmin, orderController.deleteOrder);
+router.get("/", orderController.getOrders);
+router.get("/:id", orderController.getOrderByid);
+router.post("/", orderController.createOrder);
+router.patch("/delivery/:id", orderController.updateDelivery);
+router.patch("/payment/:id", orderController.updatePayment);
+router.delete("/:id",orderController.deleteOrder);
 
 module.exports = router

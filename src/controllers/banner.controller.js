@@ -5,11 +5,24 @@ const prisma = new PrismaClient()
 
 exports.getBanners = async (req, res) => {
   try {
-    const banners = await prisma.banners.findMany();
-    if (banners.length === 0 || !banners) {
-      return res.status(404).json({ message: 'Banner not found' });
-    }
+    const banners = await prisma.banners.findMany({
+      orderBy: {
+        createdAt: 'asc',
+      },
+    });
     res.status(200).json(banners);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+exports.getBannerById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const banner = await prisma.banners.findUnique({
+      where: { id: id },
+    });
+    res.status(200).json(banner);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -24,15 +37,15 @@ exports.createBanner = async (req, res) => {
   const fileSize = file.data.length;
   const ext = path.extname(file.name);
   const fileName = file.md5 + '_' + Date.now() + ext;
-  const url = `${req.protocol}://${req.get('host')}/banners/${fileName}`;
-  const allowedType = ['.png', '.jpg', '.jpeg'];
+  const url = `${req.protocol}://localhost:5000/banners/${fileName}`;
+  const allowedType = ['.png', '.jpg', '.jpeg', '.webp'];
 
   if (!allowedType.includes(ext.toLowerCase())) {
     res.status(422).json({ msg: 'Invalid Images' });
   }
 
-  if (fileSize > 2000000) {
-    res.status(422).json({ msg: 'Image must be less than 2mb' });
+  if (fileSize > 5000000) {
+    res.status(422).json({ msg: 'Image must be less than 5mb' });
   }
   const { name } =
     req.body;
@@ -74,48 +87,47 @@ exports.updateBanner = async (req, res) => {
   let fileName = '';
   if (req.files === null) {
     fileName = banner.image;
-  } else {
+  } else{
     const file = req.files.file;
     const fileSize = file.data.length;
     const ext = path.extname(file.name);
     fileName = file.md5 + '_' + Date.now() + ext;
-    const allowedType = ['.png', '.jpg', '.jpeg'];
+    const allowedType = ['.png', '.jpg', '.jpeg', '.webp'];
 
     if (!allowedType.includes(ext.toLowerCase())) {
       res.status(422).json({ msg: 'Invalid Images' });
     }
 
-    if (fileSize > 2000000) {
-      res.status(422).json({ msg: 'Image must be less than 2mb' });
+    if (fileSize > 5000000) {
+      res.status(422).json({ msg: 'Image must be less than 5mb' });
     }
 
     const filePath = `src/public/banners/${banner.image}`;
     fs.unlinkSync(filePath);
-    const { name } =
-      req.body;
-    const url = `${req.protocol}://${req.get('host')}/banners/${fileName}`;
-
+    
     file.mv(`src/public/banners/${fileName}`, async (err) => {
       if (err) {
-        console.error(err);
         return res.status(500).json({ msg: err.message });
-      }
-      try {
-        const banner = await prisma.banners.update({
-          where: { id: id },
-          data: {
-            name,
-            image: fileName,
-            ImageUrl: url,
-          },
-        });
-        res.status(200).json({ message: 'Banner updated', banner });
-      } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Internal server error' });
       }
     });
   }
+  const { name } =
+    req.body;
+  const url = `${req.protocol}://localhost:5000/banners/${fileName}`;
+    try {
+      const banner = await prisma.banners.update({
+        where: { id: id },
+        data: {
+          name,
+          image: fileName,
+          ImageUrl: url,
+        },
+      });
+      res.status(200).json({ message: 'Banner updated', banner });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
 };
 
 exports.deleteBanner = async (req, res) => {
