@@ -22,7 +22,7 @@ exports.signUpUser = async (req, res) => {
   const fileSize = file.data.length;
   const ext = path.extname(file.name);
   const fileName = file.md5 + '_' + Date.now() + ext;
-  const url = `${req.protocol}://localhost:5000/images/${fileName}`;
+  const url = `${req.protocol}://${req.get('host')}/images/${fileName}`;
   const allowedType = ['.png', '.jpg', '.jpeg', '.webp'];
 
   if (!fullName || !username || !password || !confirmPassword || !email || !address || !phone) {
@@ -72,9 +72,6 @@ exports.signUpUser = async (req, res) => {
     }
   });
   try {
-    const refresh_token = jwt.sign({ username }, process.env.JWT_SECRET, {
-      expiresIn: '15d',
-    });
     const newUser = await prisma.users.create({
       data: {
         fullName,
@@ -85,7 +82,6 @@ exports.signUpUser = async (req, res) => {
         phone,
         profilePic: fileName,
         picUrl: url,
-        refreshToken: refresh_token
       },
     });
     if (newUser) {

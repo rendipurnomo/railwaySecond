@@ -77,7 +77,7 @@ exports.updateUser = async (req, res) => {
     });
   }
   const { fullName, username, email, address, phone } = req.body;
-  const url = `${req.protocol}://localhost:5000/images/${fileName}`;
+  const url = `${req.protocol}://${req.get('host')}/src/public/images/${fileName}`;
   try {
     const user = await prisma.users.update({
       where: { id: id },

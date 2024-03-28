@@ -37,7 +37,7 @@ exports.createBanner = async (req, res) => {
   const fileSize = file.data.length;
   const ext = path.extname(file.name);
   const fileName = file.md5 + '_' + Date.now() + ext;
-  const url = `${req.protocol}://localhost:5000/banners/${fileName}`;
+  const url = `${req.protocol}://${req.get('host')}src/public/banners/${fileName}`;
   const allowedType = ['.png', '.jpg', '.jpeg', '.webp'];
 
   if (!allowedType.includes(ext.toLowerCase())) {
@@ -113,7 +113,7 @@ exports.updateBanner = async (req, res) => {
   }
   const { name } =
     req.body;
-  const url = `${req.protocol}://localhost:5000/banners/${fileName}`;
+  const url = `${req.protocol}://${req.get('host')}src/public/banners/${fileName}`;
     try {
       const banner = await prisma.banners.update({
         where: { id: id },

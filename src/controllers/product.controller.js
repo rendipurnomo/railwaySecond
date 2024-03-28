@@ -41,7 +41,7 @@ exports.createProduct = async (req, res) => {
   const fileSize = file.data.length;
   const ext = path.extname(file.name);
   const fileName = file.md5 + "_" + Date.now() + ext;
-  const url = `${req.protocol}://localhost:5000/products/${fileName}`;
+  const url = `${req.protocol}://${req.get("host")}src/public/products/${fileName}`;
   const allowedType = [".png", ".jpg", ".jpeg"];
 
   if (!allowedType.includes(ext.toLowerCase())) {
@@ -130,7 +130,7 @@ exports.updateProduct = async (req, res) => {
   }
   const { name, brand, description, price, stock, category, position } =
     req.body;
-  const url = `${req.protocol}://localhost:5000/products/${fileName}`;
+  const url = `${req.protocol}://${req.get("host")}/src/public/products/${fileName}`;
 
   const stocks = Number(stock);
   try {
