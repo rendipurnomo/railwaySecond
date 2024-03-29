@@ -59,11 +59,11 @@ exports.updateUser = async (req, res) => {
     const allowedType = ['.png', '.jpg', '.jpeg', '.webp'];
 
     if (!allowedType.includes(ext.toLowerCase())) {
-      res.status(422).json({ msg: 'Invalid Images' });
+      res.status(422).json({ message: 'Invalid Images' });
     }
 
     if (fileSize > 2000000) {
-      res.status(422).json({ msg: 'Image must be less than 2mb' });
+      res.status(422).json({ message: 'Image must be less than 2mb' });
     }
 
     const filePath = `src/public/images/${user.profilePic}`;
@@ -77,7 +77,7 @@ exports.updateUser = async (req, res) => {
     });
   }
   const { fullName, username, email, address, phone } = req.body;
-  const url = `${req.protocol}://${req.get('host')}/src/public/images/${fileName}`;
+  const url = `${req.protocol}://${req.get('host')}/images/${fileName}`;
   try {
     const user = await prisma.users.update({
       where: { id: id },

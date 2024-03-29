@@ -41,7 +41,7 @@ exports.createBlog = async (req, res) => {
   const fileSize = file.data.length;
   const ext = path.extname(file.name);
   const fileName = file.md5 + '_' + Date.now() + ext;
-  const url = `${req.protocol}://${req.get('host')}src/public/blogs/${fileName}`;
+  const url = `${req.protocol}://${req.get('host')}/blogs/${fileName}`;
   const allowedType = ['.png', '.jpg', '.jpeg', '.webp'];
 
   if (!allowedType.includes(ext.toLowerCase())) {
@@ -120,7 +120,7 @@ exports.updateBlog = async (req, res) => {
   }
   const { title, description } =
     req.body;
-  const url = `${req.protocol}://${req.get('host')}src/public/blogs/${fileName}`;
+  const url = `${req.protocol}://${req.get('host')}/blogs/${fileName}`;
   try {
     const blog = await prisma.blogs.update({
       where: { id: id },

@@ -41,15 +41,15 @@ exports.createProduct = async (req, res) => {
   const fileSize = file.data.length;
   const ext = path.extname(file.name);
   const fileName = file.md5 + "_" + Date.now() + ext;
-  const url = `${req.protocol}://${req.get("host")}src/public/products/${fileName}`;
+  const url = `${req.protocol}://${req.get("host")}/products/${fileName}`;
   const allowedType = [".png", ".jpg", ".jpeg"];
 
   if (!allowedType.includes(ext.toLowerCase())) {
     res.status(422).json({ msg: "Invalid Images" });
   }
 
-  if (fileSize > 2000000) {
-    res.status(422).json({ msg: "Image must be less than 2mb" });
+  if (fileSize > 5000000) {
+    res.status(422).json({ msg: "Image must be less than 5Mb" });
   }
   const { name, brand, description, price, stock, category, position } =
     req.body;
@@ -64,7 +64,6 @@ exports.createProduct = async (req, res) => {
   ) {
     return res.status(400).json({ message: "Please fill in all fields" });
   }
-  const stocks = Number(stock);
   file.mv(`src/public/products/${fileName}`, async (err) => {
     if (err) {
       return res.status(500).json({ message: err.message });
@@ -77,7 +76,7 @@ exports.createProduct = async (req, res) => {
         brand,
         description,
         price,
-        stock: stocks,
+        stock: Number(stock),
         category,
         image: fileName,
         imageUrl: url,
@@ -112,11 +111,11 @@ exports.updateProduct = async (req, res) => {
     const allowedType = [".png", ".jpg", ".jpeg"];
 
     if (!allowedType.includes(ext.toLowerCase())) {
-      res.status(422).json({ msg: "Invalid Images" });
+      res.status(422).json({ message: "Invalid Images" });
     }
 
-    if (fileSize > 2000000) {
-      res.status(422).json({ msg: "Image must be less than 2mb" });
+    if (fileSize > 5000000) {
+      res.status(422).json({ message: "Image must be less than 5Mb" });
     }
 
     const filePath = `src/public/products/${product.image}`;
@@ -130,9 +129,8 @@ exports.updateProduct = async (req, res) => {
   }
   const { name, brand, description, price, stock, category, position } =
     req.body;
-  const url = `${req.protocol}://${req.get("host")}/src/public/products/${fileName}`;
+  const url = `${req.protocol}://${req.get("host")}/products/${fileName}`;
 
-  const stocks = Number(stock);
   try {
     const produk = await prisma.products.update({
       where: { id: id },
@@ -141,7 +139,7 @@ exports.updateProduct = async (req, res) => {
         brand,
         description,
         price,
-        stock: stocks,
+        stock: Number(stock),
         category,
         position,
         image: fileName,
@@ -162,7 +160,7 @@ exports.deleteProduct = async (req, res) => {
     },
   });
 
-  if (!product) return res.status(404).json({ msg: "Product not found!" });
+  if (!product) return res.status(404).json({ message: "Product not found!" });
 
   const filePath = `src/public/products/${product.image}`;
   fs.unlinkSync(filePath);
