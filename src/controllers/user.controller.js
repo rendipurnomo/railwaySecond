@@ -62,8 +62,8 @@ exports.updateUser = async (req, res) => {
       res.status(422).json({ message: 'Invalid Images' });
     }
 
-    if (fileSize > 2000000) {
-      res.status(422).json({ message: 'Image must be less than 2mb' });
+    if (fileSize > 5000000) {
+      res.status(422).json({ message: 'Image must be less than 5mb' });
     }
 
     const filePath = `src/public/images/${user.profilePic}`;
