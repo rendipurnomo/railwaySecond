@@ -41,8 +41,8 @@ exports.signUpUser = async (req, res) => {
     return res.status(422).json({ message: 'Format gambar tidak didukung' });
   }
 
-  if (fileSize > 2000000) {
-    return res.status(422).json({ message: 'Ukuran gambar tidak boleh lebih dari 2Mb' });
+  if (fileSize > 5000000) {
+    return res.status(422).json({ message: 'Ukuran gambar tidak boleh lebih dari 5Mb' });
   }
 
   const user = await prisma.users.findUnique({
