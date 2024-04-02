@@ -66,8 +66,8 @@ exports.updateUser = async (req, res) => {
       res.status(422).json({ message: 'Image must be less than 5mb' });
     }
 
-    const filePath = `src/public/images/${user.profilePic}`;
-    fs.unlinkSync(filePath);
+    // const filePath = `src/public/images/${user.profilePic}`;
+    // fs.unlinkSync(filePath);
 
     file.mv(`src/public/images/${fileName}`, (err) => {
       if (err) {
